@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>USDT to NGN Converter</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #1d3557, #457b9d);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 30px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    input {
+      width: 80%;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    button {
+      background: #e63946;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      background: #f77f00;
+    }
+
+    .rate, .result {
+      margin-top: 15px;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>💱 USDT → NGN Converter</h2>
+    <p class="rate">Fetching rate...</p>
+    <input type="number" id="amount" placeholder="Enter USDT amount" />
+    <button onclick="convert()">Convert</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    let currentRate = 0;
+
+    async function fetchRate() {
+      const res = await fetch('http://localhost:5000/api/rate');
+      const data = await res.json();
+      if (data.success) {
+        currentRate = data.rate;
+        document.querySelector('.rate').innerText = `Current rate: ₦${currentRate.toLocaleString()} per USDT`;
+      }
+    }
+
+    async function convert() {
+      const amount = document.getElementById('amount').value;
+      if (!amount) return alert('Enter amount');
+
+      const res = await fetch(`http://localhost:5000/api/convert?amount=${amount}`);
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('result').innerText = 
+          `${amount} USDT = ₦${parseFloat(data.converted_ngn).toLocaleString()}`;
+      } else {
+        document.getElementById('result').innerText = "Conversion failed.";
+      }
+    }
+
+    fetchRate();
+    setInterval(fetchRate, 60000); // update rate every minute
+  </script>
+</body>
+</html>
